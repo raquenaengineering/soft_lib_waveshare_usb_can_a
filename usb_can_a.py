@@ -9,7 +9,7 @@ import serial
 import threading
 
 
-from config import config
+from .config import config
 
 
 class usb_can_a():
