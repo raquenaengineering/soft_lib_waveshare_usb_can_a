@@ -52,6 +52,7 @@ class usb_can_a():
 
         try:
             self.serial_port = serial.Serial(serial_port_name)
+            self.serial_port.timeout = config.serial_timeout
         except:
             logging.warning("Tried to open serial port, but was already open")
         else:
@@ -153,17 +154,26 @@ class usb_can_a():
         :return: True
         """
         print("start_reception_thread() method called")
-        self.serial_reception_thread =threading.Thread(target=self.read_serial_data)                                            # I would prefer to recycle the same thread, but dunno how to.
+        self.serial_reception_thread =threading.Thread(target=self.read_serial_data_in_loop)                                            # I would prefer to recycle the same thread, but dunno how to.
+        self.stop_reception_thread_flag = False
         self.serial_reception_thread.start()
 
-    def read_serial_data(self):
+    def stop_reception_thread(self):
+        print("stop_reception_thread() method called")
+        self.stop_reception_thread_flag = True
+        # print("self.stop_reception_thread_flag")
+        # print(self.stop_reception_thread_flag)
+
+    def read_serial_data_in_loop(self):
         """
         This method will read incoming data from serial and store it in the incoming serial data buffer
         :return: True
         """
-        print("read_serial_data() method called")
+        print("read_serial_data_in_loop() method called")
 
-        while(True):
+        while(self.stop_reception_thread_flag == False):
+            # print("self.stop_reception_thread_flag")
+            # print(self.stop_reception_thread_flag)
             # print("reading serial data")
             b = self.serial_port.read(1)  # read one single byte
             self.serial_buffer.append(b)
@@ -292,3 +302,7 @@ if __name__ == "__main__":
     init_bus_message = [0x01, 0x00]
     for i in range(100):
         canbus.init_bus()
+
+    time.sleep(3)
+
+    canbus.stop_reception_thread()
