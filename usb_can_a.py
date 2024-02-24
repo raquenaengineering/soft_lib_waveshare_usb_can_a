@@ -15,6 +15,7 @@ from .config import config
 class usb_can_a():
 
     serial_port = None
+    serial_port_name = None
 
     serial_buffer = []                          # here we store all read data received from serial port for further processing.
     frame_buffer = []                           # frames will be stored in this buffer, and popped out of it when requested by the right ID
@@ -36,7 +37,8 @@ class usb_can_a():
         """
         Constructor, on creation, config_serial_port() method is called.
         """
-        self.config_serial_port(serial_port_name)
+        self.serial_port_name = serial_port_name
+        self.config_serial_port(self.serial_port_name)
         self.start_reception_thread()
 
 
@@ -48,10 +50,10 @@ class usb_can_a():
         """
 
         if serial_port_name == None:
-            serial_port_name = config.serial_port_name
+            self.serial_port_name = config.serial_port_name
 
         try:
-            self.serial_port = serial.Serial(serial_port_name)
+            self.serial_port = serial.Serial(self.serial_port_name)
             self.serial_port.timeout = config.serial_timeout
         except:
             logging.warning("Tried to open serial port, but was already open")
